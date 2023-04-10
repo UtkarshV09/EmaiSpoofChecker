@@ -1,8 +1,9 @@
-from spoof_checker import SPFChecker
+from spoof_checker import SPFChecker, DMARCChecker
 
 if __name__ == '__main__':
     # create an instance of the SPFChecker class
     spf_checker = SPFChecker()
+    dmarc_checker = DMARCChecker()
 
     # check a domain for SPF compliance
     domain = 'deepstrat.in'
@@ -33,4 +34,9 @@ if __name__ == '__main__':
         print('SPF record contains a PTR type')
     else:
         print('No PTR type found in SPF record')
+
+    if dmarc_checker.check_dmarc(domain):
+        print('DMARC record found')
+    else:
+        print("No DMARC record found")
 

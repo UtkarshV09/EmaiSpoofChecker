@@ -1,7 +1,7 @@
 import dns.resolver
-# from emailprotectionslib import spf, dmarc
 from abc import ABC, abstractmethod
-
+from dnslib import DNSRecord, QTYPE, RR
+import dns.resolver
 
 class spoof_checker(ABC):
 
@@ -93,3 +93,48 @@ class SPFChecker(spoof_checker):
         except dns.resolver.NoAnswer:
             pass
         return False
+
+class DMARCChecker(spoof_checker):
+
+    def check(self, domain):
+        return (self.check_dmarc(domain))
+
+    def check_dmarc(self, domain):
+
+        try:
+            # Query for DMARC record
+            query = '_dmarc.' + domain
+            response = dns.resolver.query(query, QTYPE.TXT)
+
+            # Parse DMARC record
+            record = response.rrset.to_text()
+            record = record.replace('" "', ';')  # Replace separator
+            record = record.replace('"', '')  # Remove quotes
+            fields = record.split(';')
+
+            # Check DMARC policy
+            for field in fields:
+                if field.startswith('p='):
+                    policy = field[2:]
+                    if policy == 'none':
+                        return False
+                    elif policy == 'quarantine' or policy == 'reject':
+                        return True
+                    else:
+                        return False
+
+            # DMARC policy not found
+            return False
+
+        except dns.resolver.NXDOMAIN:
+            # No DMARC record found
+            return False
+
+        except dns.resolver.Timeout:
+            # DNS query timed out
+            return False
+
+        except Exception as e:
+            # Other DNS query errors
+            print('Error:', e)
+            return False
