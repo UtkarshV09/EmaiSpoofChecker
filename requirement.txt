@@ -1,0 +1,17 @@
+certifi==2022.12.7
+cffi==1.15.1
+charset-normalizer==3.1.0
+checkdmarc==4.5.2
+cryptography==38.0.4
+dnslib==0.9.23
+dnspython==2.3.0
+emailprotectionslib==0.8.3
+expiringdict==1.2.2
+idna==3.4
+publicsuffix2==2.20191221
+pycparser==2.21
+pyleri==1.4.2
+requests==2.28.2
+resolver==0.2.1
+timeout-decorator==0.5.0
+urllib3==1.26.15
