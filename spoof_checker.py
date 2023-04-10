@@ -1,7 +1,7 @@
 import dns.resolver
 from abc import ABC, abstractmethod
-from dnslib import DNSRecord, QTYPE, RR
-import dns.resolver
+from dnslib import QTYPE
+
 
 class spoof_checker(ABC):
 
@@ -94,6 +94,7 @@ class SPFChecker(spoof_checker):
             pass
         return False
 
+
 class DMARCChecker(spoof_checker):
 
     def check(self, domain):
@@ -104,7 +105,7 @@ class DMARCChecker(spoof_checker):
         try:
             # Query for DMARC record
             query = '_dmarc.' + domain
-            response = dns.resolver.query(query, QTYPE.TXT)
+            response = dns.resolver.resolve(query, QTYPE.TXT)
 
             # Parse DMARC record
             record = response.rrset.to_text()
