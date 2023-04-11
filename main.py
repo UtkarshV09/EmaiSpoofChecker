@@ -1,7 +1,7 @@
-from spoof_checker import SPFChecker, DMARCChecker
+from spoof_checker import DMARCChecker, SPFChecker
 
 if __name__ == "__main__":
-    # create an instance of the SPFChecker class
+   
     spf_checker = SPFChecker()
     dmarc_checker = DMARCChecker()
 
