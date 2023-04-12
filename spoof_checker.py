@@ -6,12 +6,12 @@ from dnslib import QTYPE
 
 class spoof_checker(ABC):
     @abstractmethod
-    def check(self, domain) -> bool:
+    def check(self, domain: str) -> bool:
         pass
 
 
 class SPFChecker(spoof_checker):
-    def check(self, domain) -> bool:
+    def check(self, domain: str) -> bool:
         return (
             self.check_spf_published(domain)
             and self.check_spf_deprecated(domain)
