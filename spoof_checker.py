@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 import dns.resolver
 from dnslib import QTYPE
 
