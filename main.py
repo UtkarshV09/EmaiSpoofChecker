@@ -19,7 +19,7 @@ def main():
         print("No SPF record found")
 
     if spf_checker.check_included_lookups(
-            spf_checker.get_spf_record(domain).split(), spf_checker.check_spf_published
+        spf_checker.get_spf_record(domain).split(), spf_checker.check_spf_published
     ):
         print("All include lookups are valid")
     else:
