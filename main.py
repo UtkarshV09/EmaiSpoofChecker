@@ -6,7 +6,8 @@ def main():
     spf_checker = SPFChecker()
     dmarc_checker = DMARCChecker()
 
-    # Check a domain for SPF compliance
+    """Check a domain for SPF compliance"""
+
     domain = "deepstrat.in"
     if spf_checker.check(domain):
         print(f"{domain} is SPF compliant")

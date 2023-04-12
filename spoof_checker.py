@@ -9,6 +9,8 @@ class spoof_checker(ABC):
     def check(self, domain: str) -> bool:
         pass
 
+    """Check SPF Record"""
+
     def get_spf_record(self, domain: str) -> str:
         try:
             spf_record = dns.resolver.resolve(domain, "TXT")
@@ -19,11 +21,15 @@ class spoof_checker(ABC):
             pass
         return ""
 
+    """Check if SPF Record Publish"""
+
     def check_spf_published(self, domain: str) -> bool:
         spf_record = self.get_spf_record(domain)
         if not spf_record:
             return False
         return "v=spf1" in spf_record
+
+    """Check SPF Include Lookups"""
 
     def check_included_lookups(self, spf_parts, check_spf):
         for spf_part in spf_parts:
@@ -33,6 +39,8 @@ class spoof_checker(ABC):
                     return False
         return True
 
+    """Check SPF mx records"""
+
     def check_mx_resource_records(self, domain: str, mx_records):
         spf_parts = self.get_spf_record(domain).split()
         for spf_part in spf_parts:
@@ -41,6 +49,8 @@ class spoof_checker(ABC):
                 if mx_hostname in mx_records:
                     return True
         return False
+
+    """Check SPF ptr"""
 
     def check_type_ptr(self, domain: str):
         spf_parts = self.get_spf_record(domain).split()
