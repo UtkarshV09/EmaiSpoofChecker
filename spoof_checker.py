@@ -62,7 +62,9 @@ class SPFChecker(spoof_checker):
         spf_record = self.get_spf_record(domain)
         if not spf_record:
             return False
-        mx_records = [str(mx.exchange).rstrip(".") for mx in dns.resolver.resolve(domain, "MX")]
+        mx_records = [
+            str(mx.exchange).rstrip(".") for mx in dns.resolver.resolve(domain, "MX")
+        ]
         spf_parts = spf_record.split()
         return (
             "v=spf1" in spf_parts
