@@ -6,7 +6,7 @@ if __name__ == "__main__":
     dmarc_checker = DMARCChecker()
 
     # check a domain for SPF compliance
-    domain = "deepstrat.in"
+    domain = "ns10.nic.in"
     if spf_checker.check(domain):
         print(f"{domain} is SPF compliant")
     else:

@@ -21,7 +21,7 @@ class SPFChecker(spoof_checker):
 
     """Check if domain has a published SPF record"""
 
-    def check_spf_published(self, domain) -> bool:
+    def check_spf_published(self, domain: str) -> bool:
         try:
             spf_record = dns.resolver.resolve(domain, "TXT")
             for record in spf_record:
@@ -33,7 +33,7 @@ class SPFChecker(spoof_checker):
 
     """Check if domain has a deprecated SPF record"""
 
-    def check_spf_deprecated(self, domain) -> bool:
+    def check_spf_deprecated(self, domain: str) -> bool:
         try:
             spf_record = dns.resolver.resolve(domain, "TXT")
             for record in spf_record:
@@ -45,7 +45,7 @@ class SPFChecker(spoof_checker):
 
     """Check if included lookups in domain's SPF record are valid"""
 
-    def check_spf_included_lookups(self, domain) -> bool:
+    def check_spf_included_lookups(self, domain: str) -> bool:
         try:
             spf_record = dns.resolver.resolve(domain, "TXT")
             for record in spf_record:
@@ -63,25 +63,25 @@ class SPFChecker(spoof_checker):
 
     """Check if domain's SPF record includes all MX resource records"""
 
-    def check_spf_mx_resource_records(self, domain) -> bool:
+    def check_spf_mx_resource_records(self, domain: str) -> bool:
         try:
-            mx_records = dns.resolver.resolve(domain, "MX")
+            mx_records = [str(mx.exchange).rstrip(".") for mx in dns.resolver.resolve(domain, "MX")]
             spf_record = dns.resolver.resolve(domain, "TXT")
             for record in spf_record:
-                if "v=spf1" in record.strings[0].decode():
-                    spf_parts = record.strings[0].decode().split()
-                    for mx_record in mx_records:
-                        mx_hostname = mx_record.exchange.to_text().rstrip(".")
-                        if "mx:" + mx_hostname not in spf_parts:
-                            return False
-                    return True
+                spf_parts = record.strings[0].decode().split()
+                if "v=spf1" in spf_parts:
+                    for spf_part in spf_parts:
+                        if spf_part.startswith("mx:"):
+                            mx_hostname = spf_part.split(":")[1]
+                            if mx_hostname in mx_records:
+                                return True
+            return False
         except dns.resolver.NoAnswer:
-            pass
-        return False
+            return False
 
     """Check if domain's SPF record includes a valid ptr mechanism"""
 
-    def check_spf_type_ptr(self, domain) -> bool:
+    def check_spf_type_ptr(self, domain: str) -> bool:
         try:
             spf_record = dns.resolver.resolve(domain, "TXT")
             for record in spf_record:
@@ -101,12 +101,12 @@ class SPFChecker(spoof_checker):
 
 
 class DMARCChecker(spoof_checker):
-    def check(self, domain) -> bool:
+    def check(self, domain: str) -> bool:
         return self.check_dmarc(domain)
 
     """Check DMARC Records"""
 
-    def check_dmarc(self, domain) -> bool:
+    def check_dmarc(self, domain: str) -> bool:
         try:
             # Query for DMARC record
             query = "_dmarc." + domain
