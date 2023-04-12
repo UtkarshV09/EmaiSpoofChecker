@@ -1,6 +1,6 @@
 import unittest
 
-from spoof_checker import SPFChecker, DMARCChecker
+from spoof_checker import DMARCChecker, SPFChecker
 
 
 class TestSPFChecker(unittest.TestCase):
