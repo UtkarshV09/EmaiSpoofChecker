@@ -9,96 +9,68 @@ class spoof_checker(ABC):
     def check(self, domain: str) -> bool:
         pass
 
+    def get_spf_record(self, domain: str) -> str:
+        try:
+            spf_record = dns.resolver.resolve(domain, "TXT")
+            for record in spf_record:
+                if "v=spf1" in record.strings[0].decode():
+                    return record.strings[0].decode()
+        except dns.resolver.NoAnswer:
+            pass
+        return ""
+
+    def check_spf_published(self, domain: str) -> bool:
+        spf_record = self.get_spf_record(domain)
+        if not spf_record:
+            return False
+        return "v=spf1" in spf_record
+
+    def check_included_lookups(self, spf_parts, check_spf):
+        for spf_part in spf_parts:
+            if spf_part.startswith("include:"):
+                include_domain = spf_part.split(":")[1]
+                if not check_spf(include_domain):
+                    return False
+        return True
+
+    def check_mx_resource_records(self, domain: str, mx_records):
+        spf_parts = self.get_spf_record(domain).split()
+        for spf_part in spf_parts:
+            if spf_part.startswith("mx:"):
+                mx_hostname = spf_part.split(":")[1]
+                if mx_hostname in mx_records:
+                    return True
+        return False
+
+    def check_type_ptr(self, domain: str):
+        spf_parts = self.get_spf_record(domain).split()
+        for spf_part in spf_parts:
+            if spf_part.startswith("ptr:"):
+                ptr_domain = spf_part.split(":")[1]
+                try:
+                    ptr_record = dns.resolver.resolve(ptr_domain, "PTR")
+                    for record in ptr_record:
+                        if domain in record.to_text():
+                            return True
+                except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN):
+                    pass
+        return False
+
 
 class SPFChecker(spoof_checker):
     def check(self, domain: str) -> bool:
+        spf_record = self.get_spf_record(domain)
+        if not spf_record:
+            return False
+        mx_records = [str(mx.exchange).rstrip(".") for mx in dns.resolver.resolve(domain, "MX")]
+        spf_parts = spf_record.split()
         return (
-            self.check_spf_published(domain)
-            and self.check_spf_deprecated(domain)
-            and self.check_spf_included_lookups(domain)
-            and self.check_spf_mx_resource_records(domain)
-            and self.check_spf_type_ptr(domain)
+            "v=spf1" in spf_parts
+            and not "v=spf1" not in spf_parts
+            and self.check_included_lookups(spf_parts, self.check_spf_published)
+            and self.check_mx_resource_records(domain, mx_records)
+            and self.check_type_ptr(domain)
         )
-
-    """Check if domain has a published SPF record"""
-
-    def check_spf_published(self, domain: str) -> bool:
-        try:
-            spf_record = dns.resolver.resolve(domain, "TXT")
-            for record in spf_record:
-                if "v=spf1" in record.strings[0].decode():
-                    return True
-        except dns.resolver.NoAnswer:
-            pass
-        return False
-
-    """Check if domain has a deprecated SPF record"""
-
-    def check_spf_deprecated(self, domain: str) -> bool:
-        try:
-            spf_record = dns.resolver.resolve(domain, "TXT")
-            for record in spf_record:
-                if "v=spf1" not in record.strings[0].decode():
-                    return True
-        except dns.resolver.NoAnswer:
-            pass
-        return False
-
-    """Check if included lookups in domain's SPF record are valid"""
-
-    def check_spf_included_lookups(self, domain: str) -> bool:
-        try:
-            spf_record = dns.resolver.resolve(domain, "TXT")
-            for record in spf_record:
-                if "v=spf1" in record.strings[0].decode():
-                    spf_parts = record.strings[0].decode().split()
-                    for spf_part in spf_parts:
-                        if spf_part.startswith("include:"):
-                            include_domain = spf_part.split(":")[1]
-                            if not self.check_spf_published(include_domain):
-                                return False
-                    return True
-        except dns.resolver.NoAnswer:
-            pass
-        return False
-
-    """Check if domain's SPF record includes all MX resource records"""
-
-    def check_spf_mx_resource_records(self, domain: str) -> bool:
-        try:
-            mx_records = [str(mx.exchange).rstrip(".") for mx in dns.resolver.resolve(domain, "MX")]
-            spf_record = dns.resolver.resolve(domain, "TXT")
-            for record in spf_record:
-                spf_parts = record.strings[0].decode().split()
-                if "v=spf1" in spf_parts:
-                    for spf_part in spf_parts:
-                        if spf_part.startswith("mx:"):
-                            mx_hostname = spf_part.split(":")[1]
-                            if mx_hostname in mx_records:
-                                return True
-            return False
-        except dns.resolver.NoAnswer:
-            return False
-
-    """Check if domain's SPF record includes a valid ptr mechanism"""
-
-    def check_spf_type_ptr(self, domain: str) -> bool:
-        try:
-            spf_record = dns.resolver.resolve(domain, "TXT")
-            for record in spf_record:
-                if "v=spf1" in record.strings[0].decode():
-                    spf_parts = record.strings[0].decode().split()
-                    for spf_part in spf_parts:
-                        if spf_part.startswith("ptr:"):
-                            ptr_domain = spf_part.split(":")[1]
-                            ptr_record = dns.resolver.resolve(ptr_domain, "PTR")
-                            for record in ptr_record:
-                                if domain in record.to_text():
-                                    return True
-                    return False
-        except dns.resolver.NoAnswer:
-            pass
-        return False
 
 
 class DMARCChecker(spoof_checker):
