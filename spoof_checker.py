@@ -67,6 +67,7 @@ class SPFChecker(spoof_checker):
     def check_spf_mx_resource_records(self, domain: str) -> bool:
         try:
             mx_records = [str(mx.exchange).rstrip(".") for mx in dns.resolver.resolve(domain, "MX")]
+            mx_records = [str(mx.exchange).rstrip(".") for mx in dns.resolver.resolve(domain, "MX")]
             spf_record = dns.resolver.resolve(domain, "TXT")
             for record in spf_record:
                 spf_parts = record.strings[0].decode().split()
