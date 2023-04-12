@@ -1,6 +1,5 @@
-from spoof_checker import DMARCChecker, SPFChecker
-
 import dns.resolver
+from spoof_checker import DMARCChecker, SPFChecker
 
 
 def main():
@@ -25,7 +24,8 @@ def main():
         print("Invalid include lookups found")
 
     if spf_checker.check_mx_resource_records(
-        domain, [str(mx.exchange).rstrip(".") for mx in dns.resolver.resolve(domain, "MX")]
+        domain,
+        [str(mx.exchange).rstrip(".") for mx in dns.resolver.resolve(domain, "MX")],
     ):
         print("All MX resource records are included")
     else:
