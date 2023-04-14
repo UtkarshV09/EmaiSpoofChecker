@@ -8,7 +8,7 @@ def main():
 
     """Check a domain for SPF compliance"""
 
-    domain = "deepstrat.in"
+    domain = "cloudflare.com"
     if spf_checker.check(domain):
         print(f"{domain} is SPF compliant")
     else:
