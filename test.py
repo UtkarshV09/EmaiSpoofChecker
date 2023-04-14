@@ -1,6 +1,6 @@
 import unittest
 
-from Spooflib.spoof_checker import DMARCChecker, SPFChecker
+from Spooflib.spoof_checker import SPFChecker
 
 
 class TestSPFChecker(unittest.TestCase):
@@ -10,7 +10,9 @@ class TestSPFChecker(unittest.TestCase):
 
     def test_check_included_lookups(self):
         checker = SPFChecker()
-        self.assertTrue(checker.check_included_lookups("truecaller.com", check_spf=True))
+        self.assertTrue(
+            checker.check_included_lookups("truecaller.com", check_spf=True)
+        )
 
     # def test_check_spf_mx_resource_records(self):
     #     checker = SPFChecker()
