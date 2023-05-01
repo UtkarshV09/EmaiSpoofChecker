@@ -1,6 +1,6 @@
 import unittest
 
-from Spooflib.spoof_checker import SPFChecker
+from spooflib.spoof_checker import SPFChecker
 
 
 class TestSPFChecker(unittest.TestCase):

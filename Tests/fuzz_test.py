@@ -1,7 +1,10 @@
 import string
 from hypothesis import settings, strategies as st, given
 import dns.resolver
-from spoof_checker import SPFChecker, DMARCChecker
+from spooflib.spoof_checker import SPFChecker, DMARCChecker
+
+
+"""Generates a domain name search strategy using TLDs and domain labels"""
 
 
 def domain_name_strategy() -> st.SearchStrategy[str]:
@@ -13,7 +16,10 @@ def domain_name_strategy() -> st.SearchStrategy[str]:
     return st.tuples(domain, st.sampled_from(tlds)).map(lambda x: x[0] + x[1])
 
 
-@settings(deadline=1000)  # Increase the deadline to 1000 ms
+""" Test the SPFChecker for the given domain"""
+
+
+@settings(deadline=1000)
 @given(domain_name_strategy())
 def test_spf_checker(domain):
     spf_checker = SPFChecker()
@@ -21,7 +27,7 @@ def test_spf_checker(domain):
         result = spf_checker.check(domain)
         print(f"SPF check result for {domain}: {result}")
 
-        # Add assertions to check whether the result is correct
+        """Add assertions to check whether the result is correct"""
         assert isinstance(result, bool), f"Invalid result type: {type(result)}"
 
     except dns.resolver.NXDOMAIN:
@@ -31,7 +37,10 @@ def test_spf_checker(domain):
         raise AssertionError(f"Unexpected exception: {e}")
 
 
-@settings(deadline=1000)  # Increase the deadline to 1000 ms
+"""Test the DMARCChecker for the given domain"""
+
+
+@settings(deadline=1000)
 @given(domain_name_strategy())
 def test_dmarc_checker(domain):
     dmarc_checker = DMARCChecker()
@@ -39,7 +48,7 @@ def test_dmarc_checker(domain):
         result = dmarc_checker.check(domain)
         print(f"DMARC check result for {domain}: {result}")
 
-        # Add assertions to check whether the result is correct
+        """Add assertions to check whether the result is correct"""
         assert isinstance(result, bool), f"Invalid result type: {type(result)}"
 
     except dns.resolver.NXDOMAIN:
