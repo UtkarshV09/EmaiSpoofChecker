@@ -1,3 +1,4 @@
 dnslib==0.9.23
 dnspython~=2.3.0
+hypothesis
 resolver==0.2.1

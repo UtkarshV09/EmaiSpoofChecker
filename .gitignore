@@ -4,3 +4,4 @@ DS Store
 .idea/
 __pycache__/
 .DS_Store
+.hypothesis
